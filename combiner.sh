@@ -17,5 +17,7 @@ find processed-datasets/ -type f | perl -e 'print sort{($p=$a)=~s!.*/!!;($q=$b)=
     else
         echo "," >&3
     fi
+    dataset=$(basename $(dirname $path))
+    echo '"'$dataset'": ' >&3
     cat $path >&3
 done
