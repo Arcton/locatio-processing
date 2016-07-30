@@ -17,7 +17,14 @@ wb = load_workbook(
     read_only=True
 )
 
-ws = wb["2 Area unit"]
+worksheet_matcher= re.compile(r'area unit', re.I)
+ws = None
+for name in wb.sheetnames:
+    if worksheet_matcher.search(name):
+        ws = wb[name]
+        break
+if ws is None:
+    raise Exception("Failed to detect worksheet")
 
 rows = iter(ws.rows)
 
@@ -31,7 +38,7 @@ headers = {}
 area_unit_column = None
 area_unit_matcher = re.compile(r'area unit code', re.I)
 
-census_year_matcher = re.compile(r'^[\d]+ Census', re.I)
+census_year_matcher = re.compile(r'[\d]+ Census', re.I)
 
 h1 = next(rows)
 h2 = next(rows)
