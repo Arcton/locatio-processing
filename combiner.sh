@@ -1,20 +1,21 @@
 #!/usr/bin/env sh
 
 mkdir -p combined-datasets
-for area in $(find processed-datasets/ -type f -printf '%f\n' | sort -u); do
-    (
-        echo '{'
-        first=1
-        for dataset in $(find processed-datasets/ -name "$area"); do
-            if [[ $first -eq 1 ]]; then
-                first=0
-            else
-                echo ","
-            fi
-            echo -n '"'$(basename $(dirname $dataset))'":'
-            cat $dataset
-        done
-        echo
-        echo '}'
-    ) > combined-datasets/$area
+unset area
+unset file
+# sort files by their basename
+find processed-datasets/ -type f | perl -e 'print sort{($p=$a)=~s!.*/!!;($q=$b)=~s!.*/!!;$p cmp$q}<>' | while read path; do
+    _area=$(basename $path)
+    if [[ "$_area" != "$area" ]]; then
+        area=$_area
+        if [[ "$file" != "" ]]; then
+            echo "}" >&3
+        fi
+        file=combined-datasets/$area
+        exec 3<> $file
+        echo "{" >&3
+    else
+        echo "," >&3
+    fi
+    cat $path >&3
 done
